@@ -67,3 +67,29 @@ class QuestionIndexViewTests(TestCase):
 		self.assertQuerysetEqual(get_latest_question_list(response),
 			['<Question: %s>' % past_qst2_text,
 			'<Question: %s>' % past_qst1_text])
+
+class QuestionDetailViewTests(TestCase):
+	def test_future_question(self):
+		future_question = create_question(question_text='Future question.', days = 5)
+		url = reverse('polls:detail', args=(future_question.id,))
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 404)
+
+	def test_past_question(self):
+		past_question = create_question(question_text='Past question.', days=-5)
+		url = reverse('polls:detail', args=(past_question.id,))
+		response = self.client.get(url)
+		self.assertContains(response, past_question.question_text)
+
+class ResultsDetailViewTests(TestCase):
+	def test_future_question(self):
+		future_question = create_question(question_text='Future question.', days=5)
+		url = reverse('polls:results', args=(future_question.id,))
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 404)
+
+	def test_past_question(self):
+		past_question = create_question(question_text='Past question.', days=-5)
+		url = reverse('polls:results', args=(past_question.id,))
+		response = self.client.get(url)
+		self.assertContains(response, past_question.question_text)
